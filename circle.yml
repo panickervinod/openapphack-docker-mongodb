@@ -1,0 +1,15 @@
+machine:
+  services:
+    - docker
+dependencies:
+  cache_directories:
+    - "~/openapphack-docker-mongodb"
+  override:
+    - docker info
+    - if [[ -e ~/openapphack-docker-mongodb/image.tar ]]; then docker load --input ~/openapphack-docker-mongodb/image.tar; fi
+    - docker build -t openapphack/mongodb .
+    - mkdir -p ~/openapphack-docker-mongodb; docker save --output ~/openapphack-docker-mongodb/image.tar openapphack/mongodb
+test:
+  override:
+    - docker run -d -p 37017:27017 openapphack/mongodb; sleep 10
+    - mongo 127.0.0.1:37017/testdb --eval "db.stats()"
